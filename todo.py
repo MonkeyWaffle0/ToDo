@@ -30,14 +30,29 @@ class Task:
         self.mainWindow.update()
 
 
-class NewTask(object):
+class SaveWindow(object):
+    def __init__(self, master):
+        top = self.top = Toplevel(master)
+        self.label = Label(top, text="Name of your list :")
+        self.label.pack()
+        self.entry = Entry(top)
+        self.entry.pack()
+        self.button = Button(top, text="Save", command=self.cleanup)
+        self.button.pack()
+
+    def cleanup(self):
+        self.value = self.entry.get()
+        self.top.destroy()
+
+
+class NewTaskWindow(object):
     def __init__(self, master):
         top = self.top = Toplevel(master)
         self.label = Label(top, text="Enter your task :")
         self.label.pack()
         self.entry = Entry(top)
         self.entry.pack()
-        self.button = Button(top, text='Add', command=self.cleanup)
+        self.button = Button(top, text="Add", command=self.cleanup)
         self.button.pack()
 
     def cleanup(self):
@@ -57,7 +72,7 @@ class mainWindow(object):
         self.saveButton = Button(self.topFrame, text="Save", command=self.save)
         self.saveButton.grid(row=0, column=0)
 
-        self.loadButton = Button(self.topFrame, text="Load", command=lambda:self.load(self.entry.get() + ".txt"))
+        self.loadButton = Button(self.topFrame, text="Load", command=lambda:self.load(self.entry.get()))
         self.loadButton.grid(row=0, column=2)
         self.entry = Entry(self.topFrame)
         self.entry.grid(row=0, column=3)
@@ -70,7 +85,7 @@ class mainWindow(object):
         self.save = {}
 
     def popup(self):
-        self.window = NewTask(self.master)
+        self.window = NewTaskWindow(self.master)
         self.addButton["state"] = "disabled"
         self.master.wait_window(self.window.top)
         self.addButton["state"] = "normal"
@@ -108,9 +123,13 @@ class mainWindow(object):
                 row += 1
 
     def save(self):
+        self.window = SaveWindow(self.master)
+        self.saveButton["state"] = "disabled"
+        self.master.wait_window(self.window.top)
+        self.saveButton["state"] = "normal"
         for task in self.tasks:
             self.save[task.task] = task.state
-        with open('data.txt', 'w') as outfile:
+        with open(self.entryValue(), "w") as outfile:
             json.dump(self.save, outfile)
 
     def load(self, file):
