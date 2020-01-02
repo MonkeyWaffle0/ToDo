@@ -6,16 +6,16 @@ class Task:
         self.task = task
         self.state = "todo"
         self.mainWindow = mainWindow
+        self.button = Button(self.mainWindow.bottomFrame, text=self.task, command=self.click)
+        self.button.pack(anchor="w")
 
-    def add(self):
-        taskButton = Button(self.mainWindow.bottomFrame, text=self.task)
-        taskButton.pack(anchor="w")
-
-    def done(self):
-        self.state = "done"
-
-    def working(self):
-        self.state = "working"
+    def click(self):
+        if self.state == "todo":
+            self.state = "done"
+            self.button.pack(anchor="e")
+        elif self.state == "done":
+            self.state = "todo"
+            self.button.pack(anchor="w")
 
 
 class NewTask(object):
@@ -49,7 +49,6 @@ class mainWindow(object):
         self.addButton["state"] = "normal"
         try:
             task = Task(self.entryValue(), self)
-            task.add()
             self.tasks.append(task)
         except AttributeError:
             pass
