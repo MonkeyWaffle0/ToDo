@@ -1,14 +1,20 @@
 from tkinter import *
-import pickle
+import json
 
 
 class Task:
-    def __init__(self, task, mainWindow):
+    def __init__(self, mainWindow, task, state):
         self.task = task
-        self.state = "todo"
+        self.state = state
         self.mainWindow = mainWindow
         self.button = Button(mainWindow.topFrame, text=self.task, command=self.click)
-        self.button.grid(row=mainWindow.check("todo"), column=0)
+
+        if state == "todo":
+            self.button.grid(row=self.mainWindow.check("todo"), column=0)
+        elif state == "working":
+            self.button.grid(row=self.mainWindow.check("working"), column=1)
+        elif state == "done":
+            self.button.grid(row=self.mainWindow.check("done"), column=2)
 
     def click(self):
         if self.state == "todo":
@@ -40,19 +46,28 @@ class NewTask(object):
 
 
 class mainWindow(object):
-    def __init__(self, master):
+    def __init__(self, master, tasks):
         self.master = master
         self.topFrame = Frame(master, width=600, height=600)
         self.topFrame.pack()
 
         self.addButton = Button(self.topFrame, text="Add", command=self.popup)
-        self.addButton.grid(row=0, column=1, columnspan=3, padx=1, pady=1)
+        self.addButton.grid(row=0, column=1, padx=1, pady=1)
+
+        self.saveButton = Button(self.topFrame, text="Save", command=self.save)
+        self.saveButton.grid(row=0, column=0)
+
+        self.loadButton = Button(self.topFrame, text="Load", command=lambda:self.load(self.entry.get() + ".txt"))
+        self.loadButton.grid(row=0, column=2)
+        self.entry = Entry(self.topFrame)
+        self.entry.grid(row=0, column=3)
 
         self.todoText = Label(self.topFrame, text="To do :").grid(row=1, column=0, padx=1, pady=1)
         self.workingText = Label(self.topFrame, text="Working on :").grid(row=1, column=1, padx=1, pady=1)
         self.doneText = Label(self.topFrame, text="Done :").grid(row=1, column=2, padx=1, pady=1)
 
-        self.tasks = []
+        self.tasks = tasks
+        self.save = {}
 
     def popup(self):
         self.window = NewTask(self.master)
@@ -60,7 +75,7 @@ class mainWindow(object):
         self.master.wait_window(self.window.top)
         self.addButton["state"] = "normal"
         try:
-            task = Task(self.entryValue(), self)
+            task = Task(self, self.entryValue(), "todo")
             self.tasks.append(task)
         except AttributeError:
             pass
@@ -92,10 +107,24 @@ class mainWindow(object):
                 task.button.grid(row=row+2, column=2)
                 row += 1
 
+    def save(self):
+        for task in self.tasks:
+            self.save[task.task] = task.state
+        with open('data.txt', 'w') as outfile:
+            json.dump(self.save, outfile)
+
+    def load(self, file):
+        with open(file, "r") as readFile:
+            jsonStr = readFile.read()
+            loadedTasks = json.loads(jsonStr)
+            for task, state in loadedTasks.items():
+                new = Task(self, task, state)
+                self.tasks.append(new)
+
 
 if __name__ == "__main__":
     root = Tk()
     root.title("ToDo")
     root.geometry("300x300")
-    main = mainWindow(root)
+    main = mainWindow(root, [])
     root.mainloop()
