@@ -9,7 +9,8 @@ class Task:
         self.state = state   # State the task is (to do, working, done)
         self.mainWindow = mainWindow
         # Task is a button so it is moveable across states.
-        self.button = Button(mainWindow.frame, text=self.task, command=self.click)
+        self.button = Button(mainWindow.frame, text=self.task, command=self.left)
+        self.button.bind("<Button-3>", self.right)
 
         # Place the button in the corresponding column depending on the task's state.
         if state == "todo":
@@ -19,7 +20,7 @@ class Task:
         elif state == "done":
             self.button.grid(row=self.mainWindow.check("done"), column=2)
 
-    def click(self):
+    def left(self):
         """Move the task to the next state when clicked on."""
         if self.state == "todo":
             self.button.grid(row=self.mainWindow.check("working"), column=1)
@@ -31,6 +32,11 @@ class Task:
             self.button.grid(row=self.mainWindow.check("todo"), column=0)
             self.state = "todo"
 
+        self.mainWindow.update()
+
+    def right(self, event):
+        self.button.destroy()
+        self.mainWindow.tasks.remove(self)
         self.mainWindow.update()
 
 
