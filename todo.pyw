@@ -90,16 +90,22 @@ class MainWindow(object):
         self.saveButton.grid(row=0, column=0)
 
         #Button to load a saved list.
-        self.loadButton = Button(self.frame, text="Load", command=lambda:self.load(self.entry.get()))
+        self.loadButton = Button(self.frame, text="Load", command=lambda: self.load(self.entry.get()))
         self.loadButton.grid(row=0, column=2)
         # Entry to load the list from.
         self.entry = Entry(self.frame)
         self.entry.grid(row=0, column=3)
 
         # Text displaying "To do", "Working on" and "Done".
-        self.todoText = Label(self.frame, text="To do :").grid(row=1, column=0, padx=1, pady=1)
-        self.workingText = Label(self.frame, text="Working on :").grid(row=1, column=1, padx=1, pady=1)
-        self.doneText = Label(self.frame, text="Done !").grid(row=1, column=2, padx=1, pady=1)
+        self.todoText = Label(self.frame, text="To do :", font="arial 10 bold").grid(row=1, column=0, padx=1, pady=1)
+        self.workingText = Label(self.frame, text="Working on :", font="arial 10 bold").grid(row=1, column=1, padx=1, pady=1)
+        self.doneText = Label(self.frame, text="Done !", font="arial 10 bold").grid(row=1, column=2, padx=1, pady=1)
+
+        # Setting the minimum size of each column to 150.
+        columnCount, rowCount = self.frame.grid_size()
+        for column in range(columnCount):
+            self.frame.grid_columnconfigure(column, minsize=150)
+
 
         # List of the tasks on the window.
         self.tasks = []
@@ -170,17 +176,22 @@ class MainWindow(object):
 
     def load(self, file):
         """Load the file in the load entry field."""
-        with open(file, "r") as readFile:
-            jsonStr = readFile.read()
-            loadedTasks = json.loads(jsonStr)
-            for task, state in loadedTasks.items():
-                new = Task(self, task, state)
-                self.tasks.append(new)
+        try:
+            with open(file, "r") as readFile:
+                jsonStr = readFile.read()
+                loadedTasks = json.loads(jsonStr)
+                for task, state in loadedTasks.items():
+                    new = Task(self, task, state)
+                    self.tasks.append(new)
+        except FileNotFoundError:
+            self.noFile = Label(self.frame, text="No such file found !", fg="red", font="arial 10")
+            self.noFile.grid(row=1, column=3, padx=1, pady=1)
+            self.noFile.after(2500, self.noFile.destroy)
 
 
 if __name__ == "__main__":
     root = Tk()
     root.title("ToDo")
-    root.geometry("300x300")
+    root.geometry("600x400")
     main = MainWindow(root)
     root.mainloop()
