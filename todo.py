@@ -68,9 +68,9 @@ class NewTaskWindow(object):
         self.top.destroy()
 
 
-class mainWindow(object):
+class MainWindow(object):
     """Main window"""
-    def __init__(self, master, tasks):
+    def __init__(self, master):
         self.master = master
         self.frame = Frame(master, width=600, height=600)
         self.frame.pack()
@@ -96,7 +96,7 @@ class mainWindow(object):
         self.doneText = Label(self.frame, text="Done !").grid(row=1, column=2, padx=1, pady=1)
 
         # List of the tasks on the window.
-        self.tasks = tasks
+        self.tasks = []
         # Tasks that will be saved in a json file.
         self.save = {}
 
@@ -176,5 +176,5 @@ if __name__ == "__main__":
     root = Tk()
     root.title("ToDo")
     root.geometry("300x300")
-    main = mainWindow(root, [])
+    main = MainWindow(root)
     root.mainloop()
